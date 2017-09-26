@@ -9,7 +9,7 @@ Working within the install directory...
 3. Compile and serve web app
 ```npm start```
 4. Navigate to http://localhost:8020
-## screenshots
+## Web Application
 1. The webapp after the initial AJAX call to the api_db.sqlite database. To add an entry, click on the blue add button.
 
 ![awp_app1](https://github.com/Qqbar/react-webpack-php-app/blob/master/img/rwp_app_ss1.png "awp_app1")
@@ -26,3 +26,17 @@ Working within the install directory...
 
 ![awp_app3](https://github.com/Qqbar/react-webpack-php-app/blob/master/img/rwp_app_ss2.png "awp_app3")
 
+## API
+The API is built using a set of php scripts, all contained in the `api/` directory.
+
+```http://localhost:8010/api/device/read.php```
+
+GET request that returns a JSON object of all rows in the api_db.device table
+
+```http://localhost:8010/api/device/create.php```
+
+POST request that adds an entry into the api_db.device table
+
+```http://localhost:8010/api/device/delete.php```
+
+POST request that deletes an entry from the api_db.device table
