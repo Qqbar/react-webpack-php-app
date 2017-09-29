@@ -19,15 +19,17 @@ import {
     ButtonToolbar,
     Modal, 
     Checkbox,
-    Nav,
-    Navbar,
-    NavItem
+    Row,
+    Col,
+    Grid,
+    Jumbotron
 } from 'react-bootstrap'
 
 //React-Bootstrap CSS
 import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
 //Materials UI CSS
 import 'muicss/dist/css/mui.min.css';
+
 
 
 // CHILD BUTTON MENU CLASS
@@ -75,9 +77,7 @@ class AddTable extends React.Component {
         <div>
         <BootstrapTable data={ this.props.tableData } 
                                     pagination 
-                                    striped 
                                     hover 
-                                    condensed 
                                     search 
                                     >
           <TableHeaderColumn dataField='device_id' dataSort={ true } isKey>Id</TableHeaderColumn>
@@ -91,6 +91,7 @@ class AddTable extends React.Component {
     }
 }
 
+// CHILD FORM CLASS
 class AddForm extends React.Component {
     constructor(props) {  
         super(props);
@@ -102,6 +103,7 @@ class AddForm extends React.Component {
             macAddress: ''
         };
 
+        //BIND FUNCTIONS
         this.addEntry = this.addEntry.bind(this);
         this.handleDeviceNameChange = this.handleDeviceNameChange.bind(this);
         this.handleDeviceModelChange = this.handleDeviceModelChange.bind(this);
@@ -257,20 +259,28 @@ class App extends React.Component {
     //React Render Function
     render() {
             return (
-                <div>
-                <Panel>
-                    <AddButtonMenu 
-                        fetchDb={ this.handleFetchDb }
-                        toggleDelete={this.handleToggleDelete}
-                        toggleAddForm={this.handleShowAddForm}
-                        />
-                    <AddTable
-                    deleteColumn = { this.state.deleteColumn }
-                    tableData={ this.state.data } 
-                    deleteRow={ this.handleDeleteEntry }/>
-                </Panel>
-                {this.state.addForm? <AddForm createApiUrl = { this.createApiUrl } /> : null}
-                </div>
+                <Grid>
+                    <Row>
+                        <Col xs={12}>
+                        <br/>
+                        <Jumbotron>
+                            <p>A simple web application built with React.js for managing network devices.</p>
+                        </Jumbotron>
+                        <Panel>
+                        <AddButtonMenu 
+                            fetchDb={ this.handleFetchDb }
+                            toggleDelete={this.handleToggleDelete}
+                            toggleAddForm={this.handleShowAddForm}
+                            />
+                        <AddTable
+                            deleteColumn = { this.state.deleteColumn }
+                            tableData={ this.state.data } 
+                            deleteRow={ this.handleDeleteEntry }/>
+                        </Panel>
+                        {this.state.addForm? <AddForm createApiUrl = { this.createApiUrl } /> : null}
+                        </Col>
+                    </Row>
+                </Grid>
             );
         }
 }
