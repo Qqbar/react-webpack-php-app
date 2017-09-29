@@ -1,7 +1,7 @@
 <?php
 
     /* Script to create a new sqlite database and 
-        pre-populate it with a few entries in a 'Dogs' table
+        pre-populate it with a few entries in a 'Devices' table
         
         usage:
         php create_database.php
@@ -18,14 +18,14 @@
     //open the database
     $db = new PDO('sqlite:api_db.sqlite');
 
-    //create dogs table
+    //create devices table
     $db->exec("CREATE TABLE devices (
                     device_id INTEGER PRIMARY KEY, 
                     device_name TEXT NOT NULL, 
                     device_model TEXT NOT NULL, 
                     mac_address TEXT UNIQUE NOT NULL)");  
 
-    //populate dogs db
+    //populate devices db
     $db->exec("INSERT INTO devices (device_name, device_model, mac_address) 
                     VALUES ('temp_sense_1', 'RTD', '00-14-22-01-23-45');".
                     "INSERT INTO devices (device_name, device_model, mac_address) 

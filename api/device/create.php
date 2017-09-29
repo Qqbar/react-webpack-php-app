@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 // get database connection
 include_once '../config/database.php';
  
-// instantiate product object
+// instantiate device object
 include_once '../objects/device.php';
  
 $database = new Database();

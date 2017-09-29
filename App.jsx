@@ -18,7 +18,10 @@ import {
     Button, 
     ButtonToolbar,
     Modal, 
-    Checkbox
+    Checkbox,
+    Nav,
+    Navbar,
+    NavItem
 } from 'react-bootstrap'
 
 //React-Bootstrap CSS
@@ -26,14 +29,71 @@ import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css';
 //Materials UI CSS
 import 'muicss/dist/css/mui.min.css';
 
-//AddForm Class
-//React component that contains the Add Form
-class AddForm extends React.Component {
-    constructor() {  
-        super();
 
-        //API URL string for creating an entry
-        this.createApiUrl = 'http://localhost:8010/api/device/create.php';
+// CHILD BUTTON MENU CLASS
+class AddButtonMenu extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+        <ButtonToolbar>
+            <Button bsStyle='info' onClick={ this.props.toggleAddForm }>+</Button>
+            <Button bsStyle='danger' onClick={ this.props.toggleDelete }>-</Button>
+        </ButtonToolbar>
+        );
+    }
+}
+
+// CHILD TABLE CLASS
+class AddTable extends React.Component {
+    constructor(props) {
+        super(props);
+    
+    //BIND FUNCTIONS
+    this.buttonFormatter = this.buttonFormatter.bind(this);
+    this.handleDeleteClick= this.handleDeleteClick.bind(this);
+    }
+
+    handleDeleteClick(row) {
+      console.log(row.device_id);
+    };
+    
+    //Custom Delete button inside of table cell
+    buttonFormatter(cell, row){
+        return (
+            <Button 
+                bsSize='xsmall' 
+                bsStyle='danger' 
+                block 
+                onClick={() => this.props.deleteRow(row.device_id)}>Delete</Button>
+        )}
+
+    render(props) {
+        return (
+        <div>
+        <BootstrapTable data={ this.props.tableData } 
+                                    pagination 
+                                    striped 
+                                    hover 
+                                    condensed 
+                                    search 
+                                    >
+          <TableHeaderColumn dataField='device_id' dataSort={ true } isKey>Id</TableHeaderColumn>
+          <TableHeaderColumn dataField='device_name' dataSort={ true } >Name</TableHeaderColumn>
+          <TableHeaderColumn dataField='device_model' dataSort={ true } >Model</TableHeaderColumn>
+          <TableHeaderColumn dataField='mac_address' dataSort={ true }>MAC</TableHeaderColumn>
+          <TableHeaderColumn hidden={!this.props.deleteColumn} dataFormat={this.buttonFormatter} >Delete</TableHeaderColumn>
+        </BootstrapTable>
+        </div>
+        )
+    }
+}
+
+class AddForm extends React.Component {
+    constructor(props) {  
+        super(props);
 
         //Set initial state of form vars
         this.state = {
@@ -42,11 +102,27 @@ class AddForm extends React.Component {
             macAddress: ''
         };
 
-        //Bind functions
         this.addEntry = this.addEntry.bind(this);
         this.handleDeviceNameChange = this.handleDeviceNameChange.bind(this);
         this.handleDeviceModelChange = this.handleDeviceModelChange.bind(this);
         this.handleMacAddressChange = this.handleMacAddressChange.bind(this);
+    }
+
+    //Add entry to DB
+    addEntry(){
+        var that = this;
+
+        fetch(that.props.createApiUrl, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+            device_name: that.state.deviceName,
+            device_model: that.state.deviceModel,
+            mac_address: that.state.macAddress
+            })
+        })
     }
 
     componentDidMount() {
@@ -72,26 +148,6 @@ class AddForm extends React.Component {
     handleMacAddressChange(e) {
         this.setState({ macAddress: e.target.value });
     }
-
-    //Add entry to DB
-    addEntry(e){
-        
-        var that = this;
-
-        fetch(that.createApiUrl, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-            device_name: that.state.deviceName,
-            device_model: that.state.deviceModel,
-            mac_address: that.state.macAddress
-            })
-        })
-    }
-
-    //Form values are bound to state variables
     render() {
         return (
           <Panel>
@@ -119,64 +175,44 @@ class AddForm extends React.Component {
       );
     }
 }
+    
 
-//App Class
-//Main application class that is rendered from main.js
-//ToDo: App class should be parent container
-//All other components then rendered to App Class
+// PARENT APP CLASS
 class App extends React.Component {
 
     constructor() {
         super();
         
+        this.state = {
+                data: [{
+                    'device_name': '',
+                    'device_model': '',
+                    'mac_address': ''
+                }],
+                deleteColumn : false,
+                addForm: false
+                }
+
         //API URLs for AJAX calls
         this.readApiUrl = 'http://localhost:8010/api/device/read.php';
         this.deleteApiUrl = 'http://localhost:8010/api/device/delete.php';
-        
-        //State
-        this.state = {
-            data: [{
-                'device_name': '',
-                'device_model': '',
-                'mac_address': ''
-            }],
-            hiddenColumns: {
-            'delete_column' : true
-            },
-            childVisible: false
-        };
-        
-        //Bind Functions
-        this.changeColumn = this.changeColumn.bind(this);
-        this.showAddForm = this.showAddForm.bind(this);
-        this.buttonFormatter = this.buttonFormatter.bind(this);
-        this.fetchDb = this.fetchDb.bind(this);
-        this.deleteEntry = this.deleteEntry.bind(this);
+        this.createApiUrl = 'http://localhost:8010/api/device/create.php';
+
+        //BIND FUNCTIONS
+        this.handleFetchDb = this.handleFetchDb.bind(this);
+        this.handleDeleteEntry = this.handleDeleteEntry.bind(this);
+        this.handleToggleDelete = this.handleToggleDelete.bind(this);
+        this.handleShowAddForm = this.handleShowAddForm.bind(this);
     }
 
-    componentDidMount() {
-        this.fetchDb();
+    //Before rendering the DOM
+    componentWillMount() {
+        this.handleFetchDb();
     }
-
-    //Toggles the state of the hidden delete
-    //column true/false.
-    changeColumn(e) {
-        const p = 'delete_column';
-        this.setState({
-            hiddenColumns: Object.assign(this.state.hiddenColumns,
-            {[p]: !this.state.hiddenColumns[p]}
-            ) 
-        });
-    }
-  
-    //Changes the state of the AddForm
-    //true/false
-    showAddForm(e) {
-        this.setState({childVisible: !this.state.childVisible})
-    }
-  
+    
     //Fetch data from DB
-    fetchDb(e){
+    //--------------------------
+    handleFetchDb(e){
         var that = this;
         fetch(that.readApiUrl)
         .then(function(response) {
@@ -189,12 +225,11 @@ class App extends React.Component {
         })
     }
 
-    //Handle delete from DB
-    deleteEntry(r){
-
-        var rowDelete = r.device_id;
+    //Delete from DB
+    //-----------------------
+    handleDeleteEntry(r){
+        var rowDelete = r;
         var that = this;
-
         fetch(that.deleteApiUrl, {
             method: 'POST',
             headers: {
@@ -204,43 +239,42 @@ class App extends React.Component {
             device_id: rowDelete
             })
         })
-        .then(this.fetchDb());
-        //THIS GOES IN SUCCESS FUNCTIONthis.fetchDb();
+        .then(this.handleFetchDb());
     }
-
-    //Custom Delete button inside of table cell
-    buttonFormatter(cell, row){
-        return (
-            <Button 
-                bsSize='xsmall' 
-                bsStyle='danger' 
-                block 
-                onClick={()=>this.deleteEntry(row)}>Delete</Button>
-        )}
+    
+    //Toggle the deleteColumn state
+    //-----------------------------------------
+    handleToggleDelete() {
+        this.setState({deleteColumn: !this.state.deleteColumn})
+    }
+    
+    //Show/Hide the AddForm
+    //--------------------------------
+    handleShowAddForm() {
+        this.setState({addForm: !this.state.addForm})
+    }
 
     //React Render Function
     render() {
-        const { data } = this.state;
-        return (
-        <div>
-        <Panel>
-        <ButtonToolbar>
-            <Button bsStyle='info' onClick={ this.showAddForm }>+</Button>
-            <Button bsStyle='danger' onClick={ this.changeColumn }>-</Button>
-        </ButtonToolbar>
-        <br/>
-        <BootstrapTable data={ data } pagination striped hover condensed search>
-          <TableHeaderColumn dataField='device_id' dataSort={ true } isKey>Id</TableHeaderColumn>
-          <TableHeaderColumn dataField='device_name' dataSort={ true } >Name</TableHeaderColumn>
-          <TableHeaderColumn dataField='device_model' dataSort={ true } >Model</TableHeaderColumn>
-          <TableHeaderColumn dataField='mac_address' dataSort={ true }>MAC</TableHeaderColumn>
-          <TableHeaderColumn hidden={this.state.hiddenColumns.delete_column} dataFormat={this.buttonFormatter} >Delete</TableHeaderColumn>
-        </BootstrapTable>
-        </Panel>
-        {this.state.childVisible ? <AddForm /> : null}
-        </div>
-        );
-    }
+            return (
+                <div>
+                <Panel>
+                    <AddButtonMenu 
+                        fetchDb={ this.handleFetchDb }
+                        toggleDelete={this.handleToggleDelete}
+                        toggleAddForm={this.handleShowAddForm}
+                        />
+                    <AddTable
+                    deleteColumn = { this.state.deleteColumn }
+                    tableData={ this.state.data } 
+                    deleteRow={ this.handleDeleteEntry }/>
+                </Panel>
+                {this.state.addForm? <AddForm createApiUrl = { this.createApiUrl } /> : null}
+                </div>
+            );
+        }
 }
-
+        
 export default App;
+
+        

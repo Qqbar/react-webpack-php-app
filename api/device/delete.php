@@ -15,7 +15,7 @@ include_once '../objects/device.php';
 $database = new Database();
 $db = $database->getConnection();
  
-// prepare product object
+// prepare device object
 $device = new Device($db);
  
 // get product id
@@ -24,14 +24,14 @@ $data = json_decode(file_get_contents("php://input"));
 // set product id to be deleted
 $device->device_id = $data->device_id;
  
-// delete the product
+// delete the device
 if($device->delete()){
     echo '{';
         echo '"message": "Device was deleted."';
     echo '}';
 }
  
-// if unable to delete the product
+// if unable to delete the device
 else{
     echo '{';
         echo '"message": "Unable to delete device."';
