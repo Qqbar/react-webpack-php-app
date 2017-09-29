@@ -55,13 +55,8 @@ class AddTable extends React.Component {
     
     //BIND FUNCTIONS
     this.buttonFormatter = this.buttonFormatter.bind(this);
-    this.handleDeleteClick= this.handleDeleteClick.bind(this);
     }
 
-    handleDeleteClick(row) {
-      console.log(row.device_id);
-    };
-    
     //Custom Delete button inside of table cell
     buttonFormatter(cell, row){
         return (
@@ -111,6 +106,9 @@ class AddForm extends React.Component {
     }
 
     //Add entry to DB
+    //This is here, rather than in the App class
+    //since the form is the only component that
+    //needs access to it.
     addEntry(){
         var that = this;
 
@@ -196,6 +194,7 @@ class App extends React.Component {
                 }
 
         //API URLs for AJAX calls
+        //URLs could be moved to config file...
         this.readApiUrl = 'http://localhost:8010/api/device/read.php';
         this.deleteApiUrl = 'http://localhost:8010/api/device/delete.php';
         this.createApiUrl = 'http://localhost:8010/api/device/create.php';
